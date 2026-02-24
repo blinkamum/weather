@@ -1,0 +1,54 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+
+	<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+	<link rel="stylesheet" href="public/stylesheets/bulma.css">
+	<link rel="stylesheet" href="public/stylesheets/helpers.css">
+	<link rel="stylesheet" href="public/stylesheets/style.css">
+	<!--<link rel="stylesheet" href="public/stylesheets/debug.css">-->
+	<script src="public/scripts/jquery.js"></script>
+	<script src="public/scripts/moment.js"></script>
+	<script src="public/scripts/shared.js"></script>
+	<script src="public/scripts/main.js"></script>
+	<script src="public/scripts/zipcodes.js"></script>
+	<script src="public/scripts/classes.js"></script>
+	<title>Weather forecast</title>
+	
+</head>
+
+<body>
+	<section class="hero is-fullheight ">
+		<section class="section weather">
+			 <div class="container is-fluid">
+				<div class="columns">
+				   <div class="column center is-size-1">
+					  <h1>Weather for <span id="zipcode"></span></h1>
+				   </div>
+				</div>				
+				<div class="columns">
+				   <div class="column is-12">
+					  <table class="table is-bordered is-fullwidth">
+						 <thead>
+							<tr>
+								<th></th>
+								<th colspan="3" class="is-size-5 has-text-weight-normal">12AM</th>
+								<th colspan="3" class="is-size-5 has-text-weight-normal">3AM</th>
+								<th colspan="3" class="is-size-5 has-text-weight-normal">6AM</th>
+								<th colspan="3" class="is-size-5 has-text-weight-normal">9AM</th>
+								<th colspan="3" class="is-size-5 has-text-weight-normal">12PM</th>
+								<th colspan="3" class="is-size-5 has-text-weight-normal">3PM</th>
+								<th colspan="3" class="is-size-5 has-text-weight-normal">6PM</th>
+								<th colspan="3" class="is-size-5 has-text-weight-normal">9PM</th>
+							</tr>
+						 </thead>
+						 <tbody id="weathertable">
+						 </tbody>
+					 </table>
+				</div>
+			</div>
+		</section>
+	</section>
+</body>
+</html>

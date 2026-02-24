@@ -1,0 +1,426 @@
+body {
+	background-color: #c2d3d8
+}
+
+body .is-vertically-centered {
+	display: flex;
+	align-items: center
+}
+
+body .navbar {
+	background-color: #c2d3d8
+}
+
+body .hero .navbar-item:not(.login) {
+	margin: 0 .5em
+}
+
+body .hero.us {
+	background: url('/images/us-large.jpg') center / cover
+}
+
+body .hero.us .columns {
+	background: rgba(194, 211, 216, 0.7)
+}
+
+@media (max-width:1024px) {
+	body .hero.us {
+		background: url('/images/us-med.jpg') center / cover
+	}
+}
+
+@media (max-width:768px) {
+	body .hero.us {
+		background: url('/images/us-small.jpg') center / cover
+	}
+}
+
+body a {
+	color: initial
+}
+
+body a:hover {
+	color: black;
+	text-decoration: none
+}
+
+body #zipcode:hover {
+	cursor: pointer;
+}
+
+body .weather table {
+	background-color: #c2d3d8;
+	border-collapse: separate;
+	border-spacing: 0 1em;
+	table-layout: fixed;
+	width: 100%
+}
+
+body .weather table tr th,
+body .weather table tr td {
+	border-top: none
+}
+
+body .weather table tr th:first-child,
+body .weather table tr td:first-child {
+	border: none;
+	padding: 0
+}
+
+body .weather table tr th {
+	border-color: black
+}
+
+body .weather table tr td {
+	border-color: white
+}
+
+body .weather table tr th {
+	padding-left: .1em;
+	border-top: none;
+	border-right: none
+}
+
+body .weather table tr td {
+	border-bottom: none;
+	border-right: none
+}
+
+body .weather table tr td:first-child {
+	line-height: 4em
+}
+
+body .weather table tr td.empty+td:not(.empty) {
+	border-left: none
+}
+
+body .weather table tr td.empty,
+body .weather table tr td:first-child {
+	border: none
+}
+
+body .weather table tr td:nth-child(2),
+body .weather table tr td:nth-child(3n+3),
+body .weather table tr td:nth-child(3n+4) {
+	border-left: none
+}
+
+body .weather table tr td .dewpoint {
+	width: 100%;
+	display: block;
+	border-top: 1px solid white;
+	background: rgba(55, 55, 55, 0.95);
+	color: white;
+}
+
+body .weather table tr td .wind {
+	width: 100%;
+	display: block;
+	border-top: 1px solid white;
+  	background: rgba(172, 177, 172, 0.5);
+}
+
+body .weather table tr td .wind i {
+	margin-left: 10px;
+	font-size: 80%;
+	color: darkslategray;
+}
+
+body .weather table tr td .wind i.S {
+	transform: rotate(0deg);
+}
+
+body .weather table tr td .wind i.SSW {
+	transform: rotate(22.5deg);
+}
+
+body .weather table tr td .wind i.SW {
+	transform: rotate(45deg);
+}
+
+body .weather table tr td .wind i.WSW {
+	transform: rotate(67.5deg);
+}
+
+body .weather table tr td .wind i.W {
+	transform: rotate(90deg);
+}
+
+body .weather table tr td .wind i.WNW {
+	transform: rotate(112.5deg);
+}
+
+body .weather table tr td .wind i.NW {
+	transform: rotate(135deg);
+}
+
+body .weather table tr td .wind i.NNW {
+	transform: rotate(157.5deg);
+}
+
+body .weather table tr td .wind i.N {
+	transform: rotate(180deg);
+}
+
+body .weather table tr td .wind i.NNE {
+	transform: rotate(202.5deg);
+}
+
+body .weather table tr td .wind i.NE {
+	transform: rotate(225deg);
+}
+
+body .weather table tr td .wind i.ENE {
+	transform: rotate(247.5deg);
+}
+
+body .weather table tr td .wind i.E {
+	transform: rotate(270deg);
+}
+
+body .weather table tr td .wind i.ESE {
+	transform: rotate(292.5deg);
+}
+
+body .weather table tr td .wind i.SE {
+	transform: rotate(315deg);
+}
+
+body .weather table tr td .wind i.SSE {
+	transform: rotate(337.5deg);
+}
+
+body .weather table tr td.freezing :not(.wind, .wind i) {
+	color: white;
+}
+
+body .weather table tr td.temp100,
+body .weather table tr td.temp99,
+body .weather table tr td.temp98 {
+	background-color: #FFa000
+}
+
+body .weather table tr td.temp97,
+body .weather table tr td.temp96,
+body .weather table tr td.temp95 {
+	background-color: #FFb400
+}
+
+body .weather table tr td.temp94,
+body .weather table tr td.temp93,
+body .weather table tr td.temp92 {
+	background-color: #FFbe00
+}
+
+body .weather table tr td.temp91,
+body .weather table tr td.temp90,
+body .weather table tr td.temp89 {
+	background-color: #FFc800
+}
+
+body .weather table tr td.temp88,
+body .weather table tr td.temp87,
+body .weather table tr td.temp86 {
+	background-color: #FFdc00
+}
+
+body .weather table tr td.temp85,
+body .weather table tr td.temp84,
+body .weather table tr td.temp83 {
+	background-color: #FFf000
+}
+
+body .weather table tr td.temp82,
+body .weather table tr td.temp81,
+body .weather table tr td.temp80 {
+	background-color: #FFfa00
+}
+
+body .weather table tr td.temp79,
+body .weather table tr td.temp78,
+body .weather table tr td.temp77 {
+	background-color: #fdff00
+}
+
+body .weather table tr td.temp76,
+body .weather table tr td.temp75 {
+	background-color: #b0ff00
+}
+
+body .weather table tr td.temp74,
+body .weather table tr td.temp73 {
+	background-color: #8aff00
+}
+
+body .weather table tr td.temp72,
+body .weather table tr td.temp71 {
+	background-color: #65ff00
+}
+
+body .weather table tr td.temp70,
+body .weather table tr td.temp69 {
+	background-color: #3eff00
+}
+
+body .weather table tr td.temp68,
+body .weather table tr td.temp67 {
+	background-color: #17ff00
+}
+
+body .weather table tr td.temp66,
+body .weather table tr td.temp65 {
+	background-color: #00ff10
+}
+
+body .weather table tr td.temp64,
+body .weather table tr td.temp63 {
+	background-color: #00ff36
+}
+
+body .weather table tr td.temp62,
+body .weather table tr td.temp61 {
+	background-color: #00ff5c
+}
+
+body .weather table tr td.temp60,
+body .weather table tr td.temp59 {
+	background-color: #00ff83
+}
+
+body .weather table tr td.temp58,
+body .weather table tr td.temp57 {
+	background-color: #00ffa8
+}
+
+body .weather table tr td.temp56,
+body .weather table tr td.temp55 {
+	background-color: #00ffd0
+}
+
+body .weather table tr td.temp54,
+body .weather table tr td.temp53 {
+	background-color: #00fff4
+}
+
+body .weather table tr td.temp52,
+body .weather table tr td.temp51 {
+	background-color: #00e4ff
+}
+
+body .weather table tr td.temp50,
+body .weather table tr td.temp49 {
+	background-color: #00d4ff
+}
+
+body .weather table tr td.temp48,
+body .weather table tr td.temp47 {
+	background-color: #00c4ff
+}
+
+body .weather table tr td.temp46,
+body .weather table tr td.temp45 {
+	background-color: #00b4ff
+}
+
+body .weather table tr td.temp44,
+body .weather table tr td.temp43 {
+	background-color: #00a4ff
+}
+
+body .weather table tr td.temp42,
+body .weather table tr td.temp41 {
+	background-color: #0094ff
+}
+
+body .weather table tr td.temp40,
+body .weather table tr td.temp39 {
+	background-color: #0084ff
+}
+
+body .weather table tr td.temp38,
+body .weather table tr td.temp37 {
+	background-color: #0074ff
+}
+
+body .weather table tr td.temp36,
+body .weather table tr td.temp35 {
+	background-color: #0064ff
+}
+
+body .weather table tr td.temp34,
+body .weather table tr td.temp33 {
+	background-color: #0054ff
+}
+
+body .weather table tr td.temp32,
+body .weather table tr td.temp31 {
+	background-color: #0044ff
+}
+
+body .weather table tr td.temp30,
+body .weather table tr td.temp29 {
+	background-color: #0032ff
+}
+
+body .weather table tr td.temp28,
+body .weather table tr td.temp27 {
+	background-color: #0022ff
+}
+
+body .weather table tr td.temp26,
+body .weather table tr td.temp25 {
+	background-color: #0012ff
+}
+
+body .weather table tr td.temp24,
+body .weather table tr td.temp23 {
+	background-color: #0002ff
+}
+
+body .weather table tr td.temp22,
+body .weather table tr td.temp21 {
+	background-color: #0000ff
+}
+
+body .weather table tr td.temp20,
+body .weather table tr td.temp19 {
+	background-color: #0100ff
+}
+
+body .weather table tr td.temp18,
+body .weather table tr td.temp17 {
+	background-color: #0200ff
+}
+
+body .weather table tr td.temp16,
+body .weather table tr td.temp15 {
+	background-color: #0300ff
+}
+
+body .weather table tr td.temp14,
+body .weather table tr td.temp13 {
+	background-color: #0400ff
+}
+
+body .weather table tr td.temp12,
+body .weather table tr td.temp11 {
+	background-color: #0500ff
+}
+
+body .weather table tr td.temp10,
+body .weather table tr td.temp9,
+body .weather table tr td.temp8,
+body .weather table tr td.temp7,
+body .weather table tr td.temp6,
+body .weather table tr td.temp5,
+body .weather table tr td.temp4,
+body .weather table tr td.temp3,
+body .weather table tr td.temp2,
+body .weather table tr td.temp1,
+body .weather table tr td.temp0 {
+	background-color: #0600ff
+}
+
+body .weather table tr td.unknown {
+	background-color: #aaaaaa
+}
