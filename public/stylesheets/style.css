@@ -61,9 +61,6 @@ body .weather .weather-table-container {
 	}
 }
 @media (max-width:1180px) {
-	body #pageHeader {
-		font-size: clamp(1.25rem, 6vw, 2rem);
-	}
 
 	body .weather .weather-table-container {
 		overflow-x: auto;
