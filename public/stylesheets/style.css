@@ -55,6 +55,11 @@ body .weather .weather-table-container {
 	max-width: 100%;
 }
 
+@media (max-width:118px) {
+	body #pageHeader {
+		font-size: clamp(1rem, 4vw, 1.8rem);
+	}
+}
 @media (max-width:1180px) {
 	body #pageHeader {
 		font-size: clamp(1.25rem, 6vw, 2rem);
