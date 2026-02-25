@@ -1,94 +1,24 @@
-var addLoadEvent = function(func) {
-    var oldonload = window.onload;
-    if (typeof window.onload != 'function') {
-        window.onload = func;
-    } else {
-        window.onload = function() {
-            if (oldonload) {
-                oldonload();
-            }
-            func();
-        }
-    }
+var getPeriodIndexByStartTime = function (hourlyData) {
+
+    var periodIndexByStartTime = {};
+
+    hourlyData.properties.periods.forEach(function (period, index) {
+        periodIndexByStartTime[moment(period.startTime).toISOString()] = index;
+    });
+
+    return periodIndexByStartTime;
 }
 
-var getWeatherData = function (onSuccess) {
+var populateAmountofRainIntoHourlyData = function (gridData, hourlyData, periodIndexByStartTime) {
 
-    var firstPeriod;
-    var loopCounter;
-    var newHourlyData;
+    var amountInInches;
+    var firstPeriodIndex;
+    var numberOfHours;
+    var periods = hourlyData.properties.periods;
     var time;
     var timeSpan;
     var timeUnit;
-
-    $.get(
-        "https://api.weather.gov/points/" + getGeoPointsForZipCode(this.zipCode),
-        function (geoPointsInfo) {
-            // console.log(geoPointsInfo.properties.forecastGridData);
-            $.get(
-                geoPointsInfo.properties.forecastGridData,
-                function (gridData) {
-                    // console.log(gridData);
-                    newHourlyData = getEmptyHourlyDataObject();
-                    //populateChanceOfRainIntoHourlyData(gridData, newHourlyData);
-                    // populateAmountofRainIntoHourlyData(gridData, newHourlyData);
-                    // populateHumidityIntoHourlyData(gridData, newHourlyData);
-                    $.get(
-                        geoPointsInfo.properties.forecastHourly,
-                        function (hourlyData) {                            
-                            populateChanceOfRainIntoHourlyData(gridData, hourlyData);
-                            populateAmountofRainIntoHourlyData(gridData, hourlyData);
-                            populateHumidityIntoHourlyData(gridData, hourlyData);
-                            // console.log(hourlyData)
-                            onSuccess(hourlyData, gridData);
-                        }
-                    ).fail(function () {
-                        // getWeatherData(onSuccess);
-                        // console.log("hourlyData fail");
-                    });
-                }
-            ).fail(function(){
-                // getWeatherData(onSuccess);
-                // console.log("gridData fail");
-            });
-        }
-    )
-}
-
-var getEmptyHourlyDataObject = function () {
-
-    var newHourlyData;
-    var currentTimeBeingProccessed;
-
-    newHourlyData = {};
-    newHourlyData.properties = {};
-    newHourlyData.properties.periods = [];
-
-    currentTimeBeingProccessed = new moment().startOf('day');
-
-    for (var i = 0; i < 120; i++) {
-        newHourlyData.properties.periods[i] = {
-            startTime: currentTimeBeingProccessed
-        };
-
-        currentTimeBeingProccessed.add(1, 'hour');
-    }
-
-    return newHourlyData;
-}
-
-var initialize = function () {
-    renderPlaceHolderTable();
-    validateUrl();
-    setUpVariables();
-    setUpEventListeners();
-    getWeatherData(renderWeatherData);
-    renderNonForecastElements();
-}
-
-var populateAmountofRainIntoHourlyData = function (gridData, hourlyData) {
-
-    var numberOfHours;
+    var timeUnitCount;
 
     gridData.properties.quantitativePrecipitation.values.forEach(function (amountOfRain) {
 
@@ -103,18 +33,22 @@ var populateAmountofRainIntoHourlyData = function (gridData, hourlyData) {
             numberOfHours = 24 * timeUnitCount
         }
 
-        firstPeriod = hourlyData.properties.periods.find(function (period) {
-            return moment(time).isSame(moment(period.startTime));
-        });
+        firstPeriodIndex = periodIndexByStartTime[moment(time).toISOString()];
 
-        if (firstPeriod && (parseFloat(amountOfRain.value) / 25.4).toFixed(2) > 0) {
-            firstPeriod.amountOfRain = (parseFloat(amountOfRain.value) / 25.4).toFixed(2) + "\" >";
+        amountInInches = parseFloat(amountOfRain.value) / 25.4;
+
+        if (firstPeriodIndex !== undefined && amountInInches >= 0) {
+            amountInInches = Math.round(amountInInches * 10) / 10;
+            if (amountInInches >= 0 && amountInInches < 0.1) {
+                amountInInches = 0.1;
+            }
+            periods[firstPeriodIndex].amountOfRain = amountInInches.toFixed(1) + "\" >";
             for (var i = 0; i < numberOfHours - 1; i++) {
-                if (hourlyData.properties.periods[firstPeriod.number + i] !== undefined) {
+                if (periods[firstPeriodIndex + i + 1] !== undefined) {
                     if (i + 2 === parseInt(numberOfHours)) {
-                        hourlyData.properties.periods[firstPeriod.number + i].amountOfRain = "-> |";
+                        periods[firstPeriodIndex + i + 1].amountOfRain = "-> |";
                     } else {
-                        hourlyData.properties.periods[firstPeriod.number + i].amountOfRain = "->";
+                        periods[firstPeriodIndex + i + 1].amountOfRain = "->";
                     }
                 }
             }
@@ -122,7 +56,15 @@ var populateAmountofRainIntoHourlyData = function (gridData, hourlyData) {
     });    
 }
 
-var populateChanceOfRainIntoHourlyData = function (gridData, hourlyData, debug) {
+var populateChanceOfRainIntoHourlyData = function (gridData, hourlyData, periodIndexByStartTime) {
+
+    var firstPeriodIndex;
+    var loopCounter;
+    var periods = hourlyData.properties.periods;
+    var time;
+    var timeSpan;
+    var timeUnit;
+    var timeUnitCount;
 
     gridData.properties.probabilityOfPrecipitation.values.forEach(function (chanceOfRain) {
 
@@ -137,25 +79,27 @@ var populateChanceOfRainIntoHourlyData = function (gridData, hourlyData, debug) 
             loopCounter = 24 * timeUnitCount
         }
 
-        if (!hourlyData.properties.periods) {
-            hourlyData.properties.periods = [];
-        }
+        firstPeriodIndex = periodIndexByStartTime[moment(time).toISOString()];
 
-        firstPeriod = hourlyData.properties.periods.find(function (period) {
-            return moment(time).toString() === moment(period.startTime).toString();
-        });
-
-        if (firstPeriod) {
+        if (firstPeriodIndex !== undefined) {
             for (var i = 0; i < loopCounter; i++) {
-                if (hourlyData.properties.periods[firstPeriod.number - 1 + i] !== undefined) {
-                    hourlyData.properties.periods[firstPeriod.number - 1 + i].probabilityOfPrecipitation = chanceOfRain.value;
+                if (periods[firstPeriodIndex + i] !== undefined) {
+                    periods[firstPeriodIndex + i].probabilityOfPrecipitation = chanceOfRain.value;
                 }
             }
         }
     });
 }
 
-var populateHumidityIntoHourlyData = function (gridData, hourlyData) {
+var populateHumidityIntoHourlyData = function (gridData, hourlyData, periodIndexByStartTime) {
+
+    var firstPeriodIndex;
+    var loopCounter;
+    var periods = hourlyData.properties.periods;
+    var time;
+    var timeSpan;
+    var timeUnit;
+    var timeUnitCount;
 
     gridData.properties.dewpoint.values.forEach(function (dewPoint) {
 
@@ -170,34 +114,23 @@ var populateHumidityIntoHourlyData = function (gridData, hourlyData) {
             loopCounter = 24 * timeUnitCount
         }
 
-        firstPeriod = hourlyData.properties.periods.find(function (period) {
-            return moment(time).toString() === moment(period.startTime).toString();
-        });
+        firstPeriodIndex = periodIndexByStartTime[moment(time).toISOString()];
 
-        if (firstPeriod) {
+        if (firstPeriodIndex !== undefined) {
             for (var i = 0; i < loopCounter; i++) {
-                if (hourlyData.properties.periods[firstPeriod.number - 1 + i] !== undefined) {
-                    hourlyData.properties.periods[firstPeriod.number - 1 + i].dewPoint = parseInt((dewPoint.value * 9 / 5) + 32);
-                    // console.log(hourlyData.properties.periods[firstPeriod.number - 1 + i].probabilityOfPrecipitation);
-                    // console.log(hourlyData.properties.periods[firstPeriod.number - 1 + i].dewPoint);
-                    // console.log(hourlyData.properties.periods[firstPeriod.number - 1 + i].dewPoint < 63);
-                    if (hourlyData.properties.periods[firstPeriod.number - 1 + i].dewPoint < 63) {
-                        // console.log("nice");
-                        hourlyData.properties.periods[firstPeriod.number - 1 + i].dewPoint = "nice"
-                    } else if (hourlyData.properties.periods[firstPeriod.number - 1 + i].dewPoint < 71) {
-                        hourlyData.properties.periods[firstPeriod.number - 1 + i].dewPoint = "blah"
+                if (periods[firstPeriodIndex + i] !== undefined) {
+                    periods[firstPeriodIndex + i].dewPoint = parseInt((dewPoint.value * 9 / 5) + 32);
+                    if (periods[firstPeriodIndex + i].dewPoint < 63) {
+                        periods[firstPeriodIndex + i].dewPoint = "nice"
+                    } else if (periods[firstPeriodIndex + i].dewPoint < 71) {
+                        periods[firstPeriodIndex + i].dewPoint = "blah"
                     } else {
-                        hourlyData.properties.periods[firstPeriod.number - 1 + i].dewPoint = "gross"
+                        periods[firstPeriodIndex + i].dewPoint = "gross"
                     }
-                    // console.log("============================");
                 }
             }
         }
     });
-}
-
-var renderNonForecastElements = function(){
-    $("#zipcode").text(this.zipCode || getLocalStorageItem("zip"));
 }
 
 var renderPlaceHolderTable = function () {
@@ -208,18 +141,20 @@ var renderPlaceHolderTable = function () {
     var dayName;
     var dayNameLowerCase;
     var forecastClass;
+    var rows;
     var row;
+    var tableBody;
     var tempClass;
 
     currentTimeBeingProccessed = new moment().startOf('day');
+    rows = [];
+    tableBody = $("#weathertable");
 
     for (var i = 0; i < 5; i++) {
 
         dayName = currentTimeBeingProccessed.format('ddd');
         dayNameLowerCase = dayName.toLowerCase();
         row = $(document.createElement("tr")).addClass(dayNameLowerCase);
-
-        $("#weathertable").append(row);
 
         for (var ii = 0; ii < 25; ii++) {
             cell = $(document.createElement("td")).addClass("has-text-centered is-paddingless");
@@ -239,7 +174,11 @@ var renderPlaceHolderTable = function () {
                 currentTimeBeingProccessed.add(1, 'hour');
             }
         }
+
+        rows.push(row);
     }
+
+    tableBody.append(rows);
 
 }
 
@@ -255,8 +194,10 @@ var renderWeatherData = function (hourlyData, gridData) {
     var lastWindSpeedAndDirection;
     var periodBeingProcessed;
     var probabilityOfPrecipitation;
+    var rows;
     var row;
     var startedProcessingData;
+    var tableBody;
     var temp;
     var tempClass;
     var windDirection;
@@ -266,8 +207,10 @@ var renderWeatherData = function (hourlyData, gridData) {
     periodBeingProcessed = 0;
     currentTimeBeingProccessed = new moment().startOf('day');
     lastWindSpeedAndDirection = "";
+    rows = [];
+    tableBody = $("#weathertable");
 
-    $("#weathertable").html("");
+    tableBody.html("");
 
     while (new moment(hourlyData.properties.periods[periodBeingProcessed].startTime).toISOString() < currentTimeBeingProccessed.toISOString()){
         periodBeingProcessed++;
@@ -278,8 +221,6 @@ var renderWeatherData = function (hourlyData, gridData) {
         dayName = currentTimeBeingProccessed.format('ddd');
         dayNameLowerCase = dayName.toLowerCase();
         row = $(document.createElement("tr")).addClass(dayNameLowerCase);        
-    
-        $("#weathertable").append(row);
     
         for (var ii = 0; ii < 25; ii++) {
 
@@ -330,67 +271,9 @@ var renderWeatherData = function (hourlyData, gridData) {
                 }
             }
         }
+
+        rows.push(row);
     }
+
+    tableBody.append(rows);
 }
-
-var setUpEventListeners = function () {
-
-    var self = this;
-
-    $("#zipcode").click(function () {
-        var newZip = prompt("what zip code?");
-        setLocalStorageItem("zip", newZip);
-        if (getGeoPointsForZipCode(newZip)) {
-            window.location.href = window.location.href.replace(self.zipCode.toString(), newZip);
-        } else {
-            alert("That was not a zip code, dummy face.")
-        }
-    });
-}
-
-var setUpVariables = function () {
-    this.zipCode = getGeoPointsForZipCode(urlParams.get("zip")) ? urlParams.get("zip") : getLocalStorageItem("zip");
-}
-
-var validateUrl = function () {
-
-    this.urlParams = new URLSearchParams(window.location.search);
-
-    if (!getGeoPointsForZipCode(urlParams.get("zip"))) {
-
-        var zipCode;
-
-        if (getGeoPointsForZipCode(getLocalStorageItem("zip"))){
-            zipCode = getLocalStorageItem("zip");
-        } else {
-            zipCode = prompt("what zip code?");
-            if (!getGeoPointsForZipCode(zipCode)) {
-                alert("Oops, somethng went wrong. Setting zip code to Beverly Hills");
-                zipCode = "90210"
-            }
-        }
-
-        var hasSearchParameters = false;
-
-        var baseUrl = window.location.href.substring(0, window.location.href.indexOf(".html") + 5);
-
-        var firstParam = true;
-
-        this.urlParams.forEach(function (value, key) {
-            if (key !== "zip") {
-                hasSearchParameters = true;
-                if (firstParam) {
-                    baseUrl = baseUrl + "?"
-                    firstParam = false;
-                } else {
-                    baseUrl = baseUrl + "&"
-                }
-                baseUrl = baseUrl + key + "=" + value
-            }
-        });
-
-        window.location.replace(baseUrl + (hasSearchParameters ? "&" : "?") + "zip=" + zipCode);
-    }
-}
-
-addLoadEvent(initialize);

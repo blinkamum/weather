@@ -2,6 +2,7 @@
 
 <html lang="en">
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
 	<link rel="stylesheet" href="public/stylesheets/bulma.css">
@@ -11,9 +12,11 @@
 	<script src="public/scripts/jquery.js"></script>
 	<script src="public/scripts/moment.js"></script>
 	<script src="public/scripts/shared.js"></script>
-	<script src="public/scripts/main.js"></script>
 	<script src="public/scripts/zipcodes.js"></script>
 	<script src="public/scripts/classes.js"></script>
+	<script src="public/scripts/zip-flow.js"></script>
+	<script src="public/scripts/weather-render.js"></script>
+	<script src="public/scripts/init.js"></script>
 	<title>Weather forecast</title>
 	
 </head>
@@ -29,23 +32,25 @@
 				</div>				
 				<div class="columns">
 				   <div class="column is-12">
-					  <table class="table is-bordered is-fullwidth">
-						 <thead>
-							<tr>
-								<th></th>
-								<th colspan="3" class="is-size-5 has-text-weight-normal">12AM</th>
-								<th colspan="3" class="is-size-5 has-text-weight-normal">3AM</th>
-								<th colspan="3" class="is-size-5 has-text-weight-normal">6AM</th>
-								<th colspan="3" class="is-size-5 has-text-weight-normal">9AM</th>
-								<th colspan="3" class="is-size-5 has-text-weight-normal">12PM</th>
-								<th colspan="3" class="is-size-5 has-text-weight-normal">3PM</th>
-								<th colspan="3" class="is-size-5 has-text-weight-normal">6PM</th>
-								<th colspan="3" class="is-size-5 has-text-weight-normal">9PM</th>
-							</tr>
-						 </thead>
-						 <tbody id="weathertable">
-						 </tbody>
-					 </table>
+					  <div class="weather-table-container">
+						 <table class="table is-bordered is-fullwidth">
+							<thead>
+								<tr>
+									<th></th>
+									<th colspan="3" class="is-size-5 has-text-weight-normal">12AM</th>
+									<th colspan="3" class="is-size-5 has-text-weight-normal">3AM</th>
+									<th colspan="3" class="is-size-5 has-text-weight-normal">6AM</th>
+									<th colspan="3" class="is-size-5 has-text-weight-normal">9AM</th>
+									<th colspan="3" class="is-size-5 has-text-weight-normal">12PM</th>
+									<th colspan="3" class="is-size-5 has-text-weight-normal">3PM</th>
+									<th colspan="3" class="is-size-5 has-text-weight-normal">6PM</th>
+									<th colspan="3" class="is-size-5 has-text-weight-normal">9PM</th>
+								</tr>
+							</thead>
+							<tbody id="weathertable">
+							</tbody>
+						 </table>
+					  </div>
 				</div>
 			</div>
 		</section>

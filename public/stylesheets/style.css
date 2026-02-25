@@ -23,18 +23,6 @@ body .hero.us .columns {
 	background: rgba(194, 211, 216, 0.7)
 }
 
-@media (max-width:1024px) {
-	body .hero.us {
-		background: url('/images/us-med.jpg') center / cover
-	}
-}
-
-@media (max-width:768px) {
-	body .hero.us {
-		background: url('/images/us-small.jpg') center / cover
-	}
-}
-
 body a {
 	color: initial
 }
@@ -54,6 +42,45 @@ body .weather table {
 	border-spacing: 0 1em;
 	table-layout: fixed;
 	width: 100%
+}
+
+body .weather .weather-table-container {
+	max-width: 100%;
+}
+
+@media (max-width:1180px) {
+	body .weather .weather-table-container {
+		overflow-x: auto;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		max-height: calc(100vh - 8.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+		max-height: calc(100svh - 8.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+	}
+
+	body .weather table {
+		min-width: 1180px;
+	}
+
+	body .weather table tr th:first-child,
+	body .weather table tr td:first-child {
+		position: -webkit-sticky;
+		position: sticky;
+		left: 0;
+		z-index: 2;
+		background-color: #c2d3d8;
+	}
+
+	body .weather table thead tr th:first-child {
+		z-index: 4;
+	}
+}
+
+body .weather table thead tr th {
+	position: -webkit-sticky;
+	position: sticky;
+	top: 0;
+	z-index: 3;
+	background-color: #c2d3d8;
 }
 
 body .weather table tr th,
