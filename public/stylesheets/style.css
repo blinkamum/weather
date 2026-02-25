@@ -36,6 +36,13 @@ body #zipcode:hover {
 	cursor: pointer;
 }
 
+body #pageHeader {
+	font-size: clamp(1.5rem, 3vw, 2.8rem);
+	line-height: 1.2;
+	text-align: center;
+	word-break: break-word;
+}
+
 body .weather table {
 	background-color: #c2d3d8;
 	border-collapse: separate;
@@ -49,6 +56,10 @@ body .weather .weather-table-container {
 }
 
 @media (max-width:1180px) {
+	body #pageHeader {
+		font-size: clamp(1.25rem, 6vw, 2rem);
+	}
+
 	body .weather .weather-table-container {
 		overflow-x: auto;
 		overflow-y: auto;
