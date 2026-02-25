@@ -28,11 +28,18 @@ var setUpEventListeners = function () {
 }
 
 var redirectToZipCode = function (zipCode) {
+    var normalizedTargetZip = zipCode ? zipCode.toString() : "";
+    var currentZip = new URLSearchParams(window.location.search).get("zip");
+
+    if (currentZip === normalizedTargetZip) {
+        return;
+    }
+
     var params = new URLSearchParams(window.location.search);
     var baseUrl = window.location.origin + window.location.pathname;
 
     params.delete("zip");
-    params.set("zip", zipCode);
+    params.set("zip", normalizedTargetZip);
 
     window.location.replace(baseUrl + "?" + params.toString());
 }
