@@ -18,7 +18,7 @@ var setUpEventListeners = function () {
         getGeoPointsForZipCodeAsync(newZip).done(function (geoPoints) {
             if (geoPoints) {
                 setIndexedDbItem(LAST_ZIP_DB_KEY, newZip, function () {
-                    window.location.href = window.location.href.replace(self.zipCode.toString(), newZip);
+                    redirectToZipCode(newZip);
                 });
             } else {
                 alert("That was not a zip code, dummy face.")
@@ -28,25 +28,13 @@ var setUpEventListeners = function () {
 }
 
 var redirectToZipCode = function (zipCode) {
+    var params = new URLSearchParams(window.location.search);
+    var baseUrl = window.location.origin + window.location.pathname;
 
-    var hasSearchParameters = false;
-    var baseUrl = window.location.href.substring(0, window.location.href.indexOf(".html") + 5);
-    var firstParam = true;
+    params.delete("zip");
+    params.set("zip", zipCode);
 
-    this.urlParams.forEach(function (value, key) {
-        if (key !== "zip") {
-            hasSearchParameters = true;
-            if (firstParam) {
-                baseUrl = baseUrl + "?"
-                firstParam = false;
-            } else {
-                baseUrl = baseUrl + "&"
-            }
-            baseUrl = baseUrl + key + "=" + value
-        }
-    });
-
-    window.location.replace(baseUrl + (hasSearchParameters ? "&" : "?") + "zip=" + zipCode);
+    window.location.replace(baseUrl + "?" + params.toString());
 }
 
 var validateUrl = function (onSuccess) {
