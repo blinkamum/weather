@@ -55,6 +55,14 @@ body .weather .weather-table-container {
 	max-width: 100%;
 }
 
+body .weather #forecastMeta.forecast-meta-row {
+	width: 100%;
+	min-width: 1180px;
+	padding-left: calc(100% / 25);
+	text-align: left;
+	margin-top: .3rem;
+}
+
 @media (max-width:118px) {
 	body #pageHeader {
 		font-size: clamp(1rem, 4vw, 1.8rem);

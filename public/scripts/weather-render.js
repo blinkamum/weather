@@ -9,6 +9,45 @@ var getPeriodIndexByStartTime = function (hourlyData) {
     return periodIndexByStartTime;
 }
 
+var getDurationHoursFromValidTime = function (validTime) {
+
+    var durationToken;
+    var durationInHours;
+    var weeksMatch;
+    var daysMatch;
+    var hoursMatch;
+    var minutesMatch;
+    var secondsMatch;
+    var weeks;
+    var days;
+    var hours;
+    var minutes;
+    var seconds;
+
+    durationToken = validTime && validTime.indexOf("/") > -1 ? validTime.split("/")[1] : "PT1H";
+    durationInHours = moment.duration(durationToken).asHours();
+
+    if (!isNaN(durationInHours) && durationInHours > 0) {
+        return Math.ceil(durationInHours);
+    }
+
+    weeksMatch = durationToken.match(/(\d+)W/);
+    daysMatch = durationToken.match(/(\d+)D/);
+    hoursMatch = durationToken.match(/T.*?(\d+)H/);
+    minutesMatch = durationToken.match(/T.*?(\d+)M/);
+    secondsMatch = durationToken.match(/T.*?(\d+)S/);
+
+    weeks = weeksMatch ? parseInt(weeksMatch[1], 10) : 0;
+    days = daysMatch ? parseInt(daysMatch[1], 10) : 0;
+    hours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
+    minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
+    seconds = secondsMatch ? parseInt(secondsMatch[1], 10) : 0;
+
+    durationInHours = (weeks * 7 * 24) + (days * 24) + hours + (minutes / 60) + (seconds / 3600);
+
+    return durationInHours > 0 ? Math.ceil(durationInHours) : 1;
+}
+
 var populateAmountofRainIntoHourlyData = function (gridData, hourlyData, periodIndexByStartTime) {
 
     var amountInInches;
@@ -16,22 +55,11 @@ var populateAmountofRainIntoHourlyData = function (gridData, hourlyData, periodI
     var numberOfHours;
     var periods = hourlyData.properties.periods;
     var time;
-    var timeSpan;
-    var timeUnit;
-    var timeUnitCount;
 
     gridData.properties.quantitativePrecipitation.values.forEach(function (amountOfRain) {
 
         time = amountOfRain.validTime.split("/")[0];
-        timeSpan = amountOfRain.validTime.split("/")[1];
-        timeUnit = timeSpan.charAt(timeSpan.length - 1);
-        timeUnitCount = timeSpan.replace("P", "").replace("T", "").replace(timeSpan.charAt(timeSpan.length - 1), "");
-
-        if (timeUnit === "H") {
-            numberOfHours = timeUnitCount
-        } else {
-            numberOfHours = 24 * timeUnitCount
-        }
+        numberOfHours = getDurationHoursFromValidTime(amountOfRain.validTime);
 
         firstPeriodIndex = periodIndexByStartTime[moment(time).toISOString()];
 
@@ -39,7 +67,12 @@ var populateAmountofRainIntoHourlyData = function (gridData, hourlyData, periodI
 
         if (firstPeriodIndex !== undefined && amountInInches >= 0) {
             amountInInches = Math.round(amountInInches * 10) / 10;
-            if (amountInInches >= 0 && amountInInches < 0.1) {
+
+            if (amountInInches === 0) {
+                return;
+            }
+
+            if (amountInInches > 0 && amountInInches < 0.1) {
                 amountInInches = 0.1;
             }
             periods[firstPeriodIndex].amountOfRain = amountInInches.toFixed(1) + "\" >";
@@ -62,22 +95,11 @@ var populateChanceOfRainIntoHourlyData = function (gridData, hourlyData, periodI
     var loopCounter;
     var periods = hourlyData.properties.periods;
     var time;
-    var timeSpan;
-    var timeUnit;
-    var timeUnitCount;
 
     gridData.properties.probabilityOfPrecipitation.values.forEach(function (chanceOfRain) {
 
         time = chanceOfRain.validTime.split("/")[0];
-        timeSpan = chanceOfRain.validTime.split("/")[1];
-        timeUnit = timeSpan.charAt(timeSpan.length - 1);
-        timeUnitCount = timeSpan.replace("P", "").replace("T", "").replace(timeSpan.charAt(timeSpan.length - 1), "");
-
-        if (timeUnit === "H") {
-            loopCounter = timeUnitCount
-        } else {
-            loopCounter = 24 * timeUnitCount
-        }
+        loopCounter = getDurationHoursFromValidTime(chanceOfRain.validTime);
 
         firstPeriodIndex = periodIndexByStartTime[moment(time).toISOString()];
 
@@ -97,22 +119,11 @@ var populateHumidityIntoHourlyData = function (gridData, hourlyData, periodIndex
     var loopCounter;
     var periods = hourlyData.properties.periods;
     var time;
-    var timeSpan;
-    var timeUnit;
-    var timeUnitCount;
 
     gridData.properties.dewpoint.values.forEach(function (dewPoint) {
 
         time = dewPoint.validTime.split("/")[0];
-        timeSpan = dewPoint.validTime.split("/")[1];
-        timeUnit = timeSpan.charAt(timeSpan.length - 1);
-        timeUnitCount = timeSpan.replace("P", "").replace("T", "").replace(timeSpan.charAt(timeSpan.length - 1), "");
-
-        if (timeUnit === "H") {
-            loopCounter = timeUnitCount
-        } else {
-            loopCounter = 24 * timeUnitCount
-        }
+        loopCounter = getDurationHoursFromValidTime(dewPoint.validTime);
 
         firstPeriodIndex = periodIndexByStartTime[moment(time).toISOString()];
 
@@ -270,6 +281,7 @@ var renderWeatherData = function (hourlyData, gridData) {
     var tableBody;
     var temp;
     var tempClass;
+    var amountOfRainTitle;
     var windDirection;
     var windSpeed;
 
@@ -306,6 +318,7 @@ var renderWeatherData = function (hourlyData, gridData) {
                 if (startedProcessingData) {
 
                     amountOfRain = hourlyData.properties.periods[periodBeingProcessed].amountOfRain;
+                    amountOfRainTitle = amountOfRain === undefined ? "" : " title='Total precipitation for this forecast time block.'";
                     amountOfRain = amountOfRain === undefined ? "&nbsp;" : amountOfRain;
                     forecastClass = getForecastClasses(hourlyData.properties.periods[periodBeingProcessed], hourlyData.properties.periods[periodBeingProcessed].probabilityOfPrecipitation);
                     probabilityOfPrecipitation = hourlyData.properties.periods[periodBeingProcessed].probabilityOfPrecipitation > 10 ? hourlyData.properties.periods[periodBeingProcessed].probabilityOfPrecipitation + "%" : "";
@@ -321,13 +334,13 @@ var renderWeatherData = function (hourlyData, gridData) {
                     if (lastWindSpeedAndDirection !== windSpeed + windDirection) {
                         cell.append("<span>" + temp + "</span><br><i class='" + forecastClass + "'></i>" +
                             "<br /><span>" + probabilityOfPrecipitation + "</span>" +
-                            "<br /><span class='amountofrain'>" + amountOfRain + "</span><span class='wind'>" + windSpeed + "<i class='fas fa-arrow-up " + windDirection + "'></i></span>" +
+                            "<br /><span class='amountofrain'" + amountOfRainTitle + ">" + amountOfRain + "</span><span class='wind'>" + windSpeed + "<i class='fas fa-arrow-up " + windDirection + "'></i></span>" +
                             "<span class='dewpoint'>" + dewPoint + "</span>");
                         lastWindSpeedAndDirection = windSpeed + windDirection
                     } else {
                         cell.append("<span>" + temp + "</span><br><i class='" + forecastClass + "'></i>" +
                             "<br /><span>" + probabilityOfPrecipitation + "</span>" +
-                            "<br /><span class='amountofrain'>" + amountOfRain + "</span><span class='wind'><i class='empty'></i></span>" +
+                            "<br /><span class='amountofrain'" + amountOfRainTitle + ">" + amountOfRain + "</span><span class='wind'><i class='empty'></i></span>" +
                             "<span class='dewpoint'>" + dewPoint + "</span>");
                     }
                 } else {
