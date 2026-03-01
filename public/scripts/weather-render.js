@@ -76,6 +76,7 @@ var populateAmountofRainIntoHourlyData = function (gridData, hourlyData, periodI
                 amountInInches = 0.1;
             }
             periods[firstPeriodIndex].amountOfRain = amountInInches.toFixed(1) + "\" >";
+            periods[firstPeriodIndex].amountOfRainDurationHours = numberOfHours;
             for (var i = 0; i < numberOfHours - 1; i++) {
                 if (periods[firstPeriodIndex + i + 1] !== undefined) {
                     if (i + 2 === parseInt(numberOfHours)) {
@@ -282,6 +283,7 @@ var renderWeatherData = function (hourlyData, gridData) {
     var temp;
     var tempClass;
     var amountOfRainTitle;
+    var amountOfRainDurationHours;
     var windDirection;
     var windSpeed;
 
@@ -318,7 +320,10 @@ var renderWeatherData = function (hourlyData, gridData) {
                 if (startedProcessingData) {
 
                     amountOfRain = hourlyData.properties.periods[periodBeingProcessed].amountOfRain;
-                    amountOfRainTitle = amountOfRain === undefined ? "" : " title='Total precipitation for this forecast time block.'";
+                    amountOfRainDurationHours = hourlyData.properties.periods[periodBeingProcessed].amountOfRainDurationHours;
+                    amountOfRainTitle = amountOfRainDurationHours === undefined
+                        ? ""
+                        : " title='Total precipitation for the next " + amountOfRainDurationHours + " hour" + (amountOfRainDurationHours === 1 ? "" : "s") + ".'";
                     amountOfRain = amountOfRain === undefined ? "&nbsp;" : amountOfRain;
                     forecastClass = getForecastClasses(hourlyData.properties.periods[periodBeingProcessed], hourlyData.properties.periods[periodBeingProcessed].probabilityOfPrecipitation);
                     probabilityOfPrecipitation = hourlyData.properties.periods[periodBeingProcessed].probabilityOfPrecipitation > 10 ? hourlyData.properties.periods[periodBeingProcessed].probabilityOfPrecipitation + "%" : "";
