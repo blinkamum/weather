@@ -48,6 +48,50 @@ var getDurationHoursFromValidTime = function (validTime) {
     return durationInHours > 0 ? Math.ceil(durationInHours) : 1;
 }
 
+var isAmountOfRainTooltipInteractionsInitialized = false;
+var amountOfRainTooltipHideTimer;
+
+var initializeAmountOfRainTooltipInteractions = function () {
+
+    if (isAmountOfRainTooltipInteractionsInitialized) {
+        return;
+    }
+
+    isAmountOfRainTooltipInteractionsInitialized = true;
+
+    $(document).on("click.amountOfRainTooltip", ".amountofrain[data-tooltip]", function (event) {
+        var target = $(this);
+
+        event.stopPropagation();
+
+        if (amountOfRainTooltipHideTimer) {
+            clearTimeout(amountOfRainTooltipHideTimer);
+        }
+
+        $(".amountofrain.show-tooltip").not(target).removeClass("show-tooltip");
+        target.toggleClass("show-tooltip");
+
+        if (target.hasClass("show-tooltip")) {
+            amountOfRainTooltipHideTimer = setTimeout(function () {
+                target.removeClass("show-tooltip");
+            }, 2600);
+        }
+    });
+
+    $(document).on("keydown.amountOfRainTooltip", ".amountofrain[data-tooltip]", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            $(this).trigger("click");
+        }
+    });
+
+    $(document).on("click.amountOfRainTooltipDismiss", function (event) {
+        if ($(event.target).closest(".amountofrain[data-tooltip]").length === 0) {
+            $(".amountofrain.show-tooltip").removeClass("show-tooltip");
+        }
+    });
+}
+
 var populateAmountofRainIntoHourlyData = function (gridData, hourlyData, periodIndexByStartTime) {
 
     var amountInInches;
@@ -282,10 +326,12 @@ var renderWeatherData = function (hourlyData, gridData) {
     var tableBody;
     var temp;
     var tempClass;
-    var amountOfRainTitle;
+    var amountOfRainTooltipAttributes;
     var amountOfRainDurationHours;
     var windDirection;
     var windSpeed;
+
+    initializeAmountOfRainTooltipInteractions();
 
     startedProcessingData = false;
     periodBeingProcessed = 0;
@@ -321,9 +367,9 @@ var renderWeatherData = function (hourlyData, gridData) {
 
                     amountOfRain = hourlyData.properties.periods[periodBeingProcessed].amountOfRain;
                     amountOfRainDurationHours = hourlyData.properties.periods[periodBeingProcessed].amountOfRainDurationHours;
-                    amountOfRainTitle = amountOfRainDurationHours === undefined
+                    amountOfRainTooltipAttributes = amountOfRainDurationHours === undefined
                         ? ""
-                        : " title='Total precipitation for the next " + amountOfRainDurationHours + " hour" + (amountOfRainDurationHours === 1 ? "" : "s") + ".'";
+                        : " tabindex='0' role='button' aria-label='Total precipitation for the next " + amountOfRainDurationHours + " hour" + (amountOfRainDurationHours === 1 ? "" : "s") + ".' data-tooltip='Total precipitation for the next " + amountOfRainDurationHours + " hour" + (amountOfRainDurationHours === 1 ? "" : "s") + ".'";
                     amountOfRain = amountOfRain === undefined ? "&nbsp;" : amountOfRain;
                     forecastClass = getForecastClasses(hourlyData.properties.periods[periodBeingProcessed], hourlyData.properties.periods[periodBeingProcessed].probabilityOfPrecipitation);
                     probabilityOfPrecipitation = hourlyData.properties.periods[periodBeingProcessed].probabilityOfPrecipitation > 10 ? hourlyData.properties.periods[periodBeingProcessed].probabilityOfPrecipitation + "%" : "";
@@ -339,13 +385,13 @@ var renderWeatherData = function (hourlyData, gridData) {
                     if (lastWindSpeedAndDirection !== windSpeed + windDirection) {
                         cell.append("<span>" + temp + "</span><br><i class='" + forecastClass + "'></i>" +
                             "<br /><span>" + probabilityOfPrecipitation + "</span>" +
-                            "<br /><span class='amountofrain'" + amountOfRainTitle + ">" + amountOfRain + "</span><span class='wind'>" + windSpeed + "<i class='fas fa-arrow-up " + windDirection + "'></i></span>" +
+                            "<br /><span class='amountofrain'" + amountOfRainTooltipAttributes + ">" + amountOfRain + "</span><span class='wind'>" + windSpeed + "<i class='fas fa-arrow-up " + windDirection + "'></i></span>" +
                             "<span class='dewpoint'>" + dewPoint + "</span>");
                         lastWindSpeedAndDirection = windSpeed + windDirection
                     } else {
                         cell.append("<span>" + temp + "</span><br><i class='" + forecastClass + "'></i>" +
                             "<br /><span>" + probabilityOfPrecipitation + "</span>" +
-                            "<br /><span class='amountofrain'" + amountOfRainTitle + ">" + amountOfRain + "</span><span class='wind'><i class='empty'></i></span>" +
+                            "<br /><span class='amountofrain'" + amountOfRainTooltipAttributes + ">" + amountOfRain + "</span><span class='wind'><i class='empty'></i></span>" +
                             "<span class='dewpoint'>" + dewPoint + "</span>");
                     }
                 } else {
