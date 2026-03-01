@@ -41,7 +41,10 @@ var initialize = function () {
     renderPlaceHolderTable();
     validateUrl(function () {
         setUpEventListeners();
-        getWeatherData(renderWeatherData);
+        getWeatherData(function (hourlyData, gridData) {
+            renderWeatherData(hourlyData, gridData);
+            renderForecastMeta(hourlyData, gridData);
+        });
         renderNonForecastElements();
     });
 }

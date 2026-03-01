@@ -182,6 +182,76 @@ var renderPlaceHolderTable = function () {
 
 }
 
+var getForecastMidnight = function (hourlyData) {
+
+    var periods;
+    var forecastOffset;
+
+    periods = hourlyData && hourlyData.properties ? hourlyData.properties.periods : undefined;
+
+    if (!periods || !periods.length || !periods[0].startTime) {
+        return new moment().startOf('day');
+    }
+
+    forecastOffset = moment.parseZone(periods[0].startTime).format("Z");
+
+    return new moment().utcOffset(forecastOffset).startOf('day');
+}
+
+var renderForecastMeta = function (hourlyData, gridData) {
+
+    var forecastMetaElement;
+    var periods;
+    var firstPeriod;
+    var lastPeriod;
+    var forecastOffset;
+    var updateTime;
+    var validRange;
+    var validRangeText;
+    var lastUpdatedText;
+    var lastUpdatedRelativeText;
+
+    forecastMetaElement = $("#forecastMeta");
+
+    if (!forecastMetaElement.length) {
+        return;
+    }
+
+    periods = hourlyData && hourlyData.properties ? hourlyData.properties.periods : undefined;
+
+    if (!periods || !periods.length) {
+        forecastMetaElement.text("");
+        return;
+    }
+
+    firstPeriod = periods[0];
+    lastPeriod = periods[periods.length - 1];
+    forecastOffset = firstPeriod.startTime ? moment.parseZone(firstPeriod.startTime).format("Z") : moment().format("Z");
+
+    updateTime = hourlyData && hourlyData.properties ? hourlyData.properties.updateTime || hourlyData.properties.generatedAt : undefined;
+    validRange = firstPeriod.startTime && lastPeriod.endTime
+        ? firstPeriod.startTime + "/" + lastPeriod.endTime
+        : (gridData && gridData.properties ? gridData.properties.validTimes : undefined);
+
+    lastUpdatedText = updateTime
+        ? moment.parseZone(updateTime).utcOffset(forecastOffset).format("ddd M/D h:mm A")
+        : "unknown";
+
+    lastUpdatedRelativeText = updateTime
+        ? moment.parseZone(updateTime).fromNow()
+        : "unknown";
+
+    if (validRange && validRange.indexOf("/") > -1) {
+        validRangeText = moment.parseZone(validRange.split("/")[0]).utcOffset(forecastOffset).format("ddd M/D h:mm A") +
+            " to " +
+            moment.parseZone(validRange.split("/")[1]).utcOffset(forecastOffset).format("ddd M/D h:mm A");
+    } else {
+        validRangeText = "unknown";
+    }
+
+    forecastMetaElement.text("Forecast updated " + lastUpdatedText + " (" + lastUpdatedRelativeText + ") | valid " + validRangeText + " (UTC" + forecastOffset + ")");
+}
+
 var renderWeatherData = function (hourlyData, gridData) {
     
     var amountOfRain;
@@ -205,7 +275,7 @@ var renderWeatherData = function (hourlyData, gridData) {
 
     startedProcessingData = false;
     periodBeingProcessed = 0;
-    currentTimeBeingProccessed = new moment().startOf('day');
+    currentTimeBeingProccessed = getForecastMidnight(hourlyData);
     lastWindSpeedAndDirection = "";
     rows = [];
     tableBody = $("#weathertable");
