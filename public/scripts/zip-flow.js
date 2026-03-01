@@ -1,4 +1,56 @@
 var LAST_ZIP_DB_KEY = "lastZipCode";
+var ZIP_COPY_MODE = "friendly";
+var ZIP_COPY_MODE_STORAGE_KEY = "zipCopyMode";
+var zipModeBannerTimer;
+
+var toggleZipCopyMode = function () {
+    ZIP_COPY_MODE = ZIP_COPY_MODE === "friendly" ? "1988-terminal-gremlin" : "friendly";
+    setLocalStorageItem(ZIP_COPY_MODE_STORAGE_KEY, ZIP_COPY_MODE);
+
+    if (zipModeBannerTimer) {
+        clearTimeout(zipModeBannerTimer);
+    }
+
+    if (ZIP_COPY_MODE === "1988-terminal-gremlin") {
+        renderZipValidationMessage("MODE: 1988 TERMINAL GREMLIN // BOOT OK");
+    } else {
+        renderZipValidationMessage("MODE: FRIENDLY // HUMAN INTERFACE RESTORED");
+    }
+
+    zipModeBannerTimer = setTimeout(function () {
+        renderZipValidationMessage("");
+    }, 2200);
+}
+
+var initializeZipCopyMode = function () {
+    var storedMode = getLocalStorageItem(ZIP_COPY_MODE_STORAGE_KEY);
+
+    if (storedMode === "friendly" || storedMode === "1988-terminal-gremlin") {
+        ZIP_COPY_MODE = storedMode;
+    }
+}
+
+var getZipCopy = function () {
+    if (ZIP_COPY_MODE === "1988-terminal-gremlin") {
+        return {
+            prompt: "ZIP?> _",
+            invalid: function (input) {
+                return "INPUT \"" + input + "\" REJECTED. EXPECTED 5 DIGITS. TRY 90210.";
+            }
+        };
+    }
+
+    return {
+        prompt: "Enter a 5-digit ZIP code:",
+        invalid: function (input) {
+            return "\"" + input + "\" isn’t a valid ZIP code. Please enter a 5-digit ZIP (example: 90210).";
+        }
+    };
+}
+
+var renderZipValidationMessage = function (message) {
+    $("#zipValidationMessage").text(message || "");
+}
 
 var renderNonForecastElements = function(){
     $("#zipcode").text(this.zipCode);
@@ -8,8 +60,20 @@ var setUpEventListeners = function () {
 
     var self = this;
 
+    $(document).off("keydown.zipCopyModeToggle").on("keydown.zipCopyModeToggle", function (event) {
+        var isObscureToggle = event.ctrlKey && event.altKey && event.shiftKey && (event.code === "Backquote" || event.key === "`");
+
+        if (isObscureToggle) {
+            event.preventDefault();
+            toggleZipCopyMode();
+        }
+    });
+
     $("#zipcode").click(function () {
-        var newZip = prompt("what zip code?");
+        var copy = getZipCopy();
+        var newZip = prompt(copy.prompt);
+
+        renderZipValidationMessage("");
 
         if (!newZip) {
             return;
@@ -21,7 +85,7 @@ var setUpEventListeners = function () {
                     redirectToZipCode(newZip);
                 });
             } else {
-                alert("That was not a zip code, dummy face.")
+                renderZipValidationMessage(copy.invalid(newZip));
             }
         });
     });
@@ -87,3 +151,5 @@ var validateUrl = function (onSuccess) {
         });
     });
 }
+
+initializeZipCopyMode();
