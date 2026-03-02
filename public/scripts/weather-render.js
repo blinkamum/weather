@@ -308,6 +308,125 @@ var renderForecastMeta = function (hourlyData, gridData) {
     forecastMetaElement.text("Forecast updated " + lastUpdatedText + " (" + lastUpdatedRelativeText + ") | valid " + validRangeText + " (UTC" + forecastOffset + ")");
 }
 
+var renderHazardMessages = function (alertsData) {
+
+    var hazardMessagesElement;
+    var features;
+    var messages;
+    var escapeHtml;
+    var normalizeDescriptionText;
+
+    hazardMessagesElement = $("#hazardMessages");
+
+    if (!hazardMessagesElement.length) {
+        return;
+    }
+
+    features = alertsData && alertsData.features ? alertsData.features : [];
+
+    if (!features.length) {
+        hazardMessagesElement.html("");
+        return;
+    }
+
+    escapeHtml = function (value) {
+        return $("<div>").text(value || "").html();
+    }
+
+    normalizeDescriptionText = function (descriptionText) {
+        var normalized = descriptionText || "";
+        var firstAsteriskIndex;
+
+        normalized = normalized.replace(/\r\n/g, "\n");
+
+        firstAsteriskIndex = normalized.indexOf("*");
+
+        if (firstAsteriskIndex > -1) {
+            normalized = normalized.substring(0, firstAsteriskIndex) + normalized.substring(firstAsteriskIndex + 1);
+        }
+
+        normalized = normalized.replace(/\*/g, "\n\n");
+        normalized = normalized.replace(/[ \t]*\n\n[ \t]*/g, "\n\n");
+        normalized = normalized.replace(/\n{3,}/g, "\n\n");
+
+        return normalized.trim();
+    }
+
+    messages = features
+        .map(function (feature) {
+            var properties = feature && feature.properties ? feature.properties : {};
+            var identifier = feature && feature.id ? feature.id : "";
+            var eventName = properties.event || "Hazard";
+            var headline = properties.headline || "";
+            var description = properties.description || "";
+            var instruction = properties.instruction || "";
+            var expiresAt = properties.expires
+                ? moment.parseZone(properties.expires).format("ddd M/D h:mm A")
+                : "";
+
+            if (headline) {
+                headline = headline.trim();
+            }
+
+            if (description) {
+                description = normalizeDescriptionText(description);
+            }
+
+            if (instruction) {
+                instruction = instruction.trim();
+            }
+
+            return {
+                key: identifier || (eventName + "|" + headline + "|" + description + "|" + instruction),
+                eventName: eventName,
+                headline: headline,
+                description: description,
+                instruction: instruction,
+                expiresAt: expiresAt
+            };
+        })
+        .filter(function (message) {
+            return message.eventName || message.headline || message.description || message.instruction;
+        });
+
+    messages = messages.filter(function (message, index, array) {
+        return array.findIndex(function (item) {
+            return item.key === message.key;
+        }) === index;
+    });
+
+    if (!messages.length) {
+        hazardMessagesElement.html("");
+        return;
+    }
+
+    hazardMessagesElement.html(
+        "<article class='message is-warning is-light'>" +
+            "<div class='message-header'><p>Active NWS alerts</p></div>" +
+            "<div class='message-body'><ul>" +
+                messages.map(function (message) {
+                    var title = escapeHtml(message.eventName + (message.headline ? ": " + message.headline : ""));
+                    var expiresText = escapeHtml(message.expiresAt || "—");
+                    var descriptionText = escapeHtml(message.description || "—").replace(/\n\n+/g, "<br><br>");
+                    var instructionText = escapeHtml(message.instruction || "—");
+
+                    return "<li>" +
+                        "<div><strong>" + title + "</strong></div>" +
+                        "<table class='hazard-detail-table'>" +
+                            "<thead>" +
+                                "<tr><th>Until</th><th>Description</th><th>Instruction</th></tr>" +
+                            "</thead>" +
+                            "<tbody>" +
+                                "<tr><td>" + expiresText + "</td><td>" + descriptionText + "</td><td>" + instructionText + "</td></tr>" +
+                            "</tbody>" +
+                        "</table>" +
+                    "</li>";
+                }).join("") +
+            "</ul></div>" +
+        "</article>"
+    );
+}
+
 var renderWeatherData = function (hourlyData, gridData) {
     
     var amountOfRain;

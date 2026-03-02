@@ -63,6 +63,74 @@ body .weather #forecastMeta.forecast-meta-row {
 	margin-top: .3rem;
 }
 
+body .weather #hazardMessages.hazard-messages-row {
+	width: 100%;
+	min-width: 1180px;
+	padding-left: calc(100% / 25);
+	text-align: left;
+	margin-top: .3rem;
+}
+
+body .weather #hazardMessages.hazard-messages-row .message {
+	margin-bottom: .3rem;
+}
+
+body .weather #hazardMessages.hazard-messages-row .message-body ul {
+	margin: 0;
+	padding-left: 1.2em;
+}
+
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: auto;
+	margin-top: .2rem;
+}
+
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table th,
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table td {
+	padding: .2rem .35rem;
+	vertical-align: top;
+	border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table th + th,
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table td + td {
+	border-left: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table th {
+	font-weight: 600;
+	text-align: left;
+}
+
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table td {
+	word-break: normal;
+	overflow-wrap: break-word;
+}
+
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table th:nth-child(1),
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table td:nth-child(1) {
+	width: 1%;
+	white-space: nowrap;
+	word-break: normal;
+	text-align: right;
+}
+
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table th:nth-child(1) {
+	text-align: center;
+}
+
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table th:nth-child(2),
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table td:nth-child(2) {
+	width: auto;
+}
+
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table th:nth-child(3),
+body .weather #hazardMessages.hazard-messages-row .hazard-detail-table td:nth-child(3) {
+	width: 20%;
+}
+
 @media (max-width:118px) {
 	body #pageHeader {
 		font-size: clamp(1rem, 4vw, 1.8rem);
