@@ -388,7 +388,7 @@ var renderHazardMessages = function (alertsData) {
         normalized = normalized.replace(/\n{3,}/g, "\n\n");
 
         paragraphs = normalized.split("\n\n").filter(function (paragraph) {
-            return !/^WHAT\.\.\./i.test((paragraph || "").trim());
+            return !/^WHERE\.\.\./i.test((paragraph || "").trim());
         });
 
         normalized = paragraphs.join("\n\n");
