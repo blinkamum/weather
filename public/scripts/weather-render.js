@@ -313,6 +313,9 @@ var renderHazardMessages = function (alertsData) {
     var hazardMessagesElement;
     var features;
     var messages;
+    var requestFailed;
+    var requestStatus;
+    var requestHttpStatus;
     var escapeHtml;
     var normalizeDescriptionText;
 
@@ -323,8 +326,23 @@ var renderHazardMessages = function (alertsData) {
     }
 
     features = alertsData && alertsData.features ? alertsData.features : [];
+    requestFailed = alertsData && alertsData.requestFailed === true;
+    requestStatus = alertsData && alertsData.requestStatus ? alertsData.requestStatus : "error";
+    requestHttpStatus = alertsData && alertsData.requestHttpStatus ? alertsData.requestHttpStatus : undefined;
 
     if (!features.length) {
+        if (requestFailed) {
+            hazardMessagesElement.html(
+                "<article class='message is-danger is-light'>" +
+                    "<div class='message-header'><p>Active NWS alerts</p></div>" +
+                    "<div class='message-body'>Unable to load alerts right now (" +
+                        escapeHtml(requestStatus + (requestHttpStatus ? ", HTTP " + requestHttpStatus : "")) +
+                    ").</div>" +
+                "</article>"
+            );
+            return;
+        }
+
         hazardMessagesElement.html("");
         return;
     }
@@ -336,6 +354,7 @@ var renderHazardMessages = function (alertsData) {
     normalizeDescriptionText = function (descriptionText) {
         var normalized = descriptionText || "";
         var firstAsteriskIndex;
+        var paragraphs;
 
         normalized = normalized.replace(/\r\n/g, "\n");
 
@@ -348,6 +367,12 @@ var renderHazardMessages = function (alertsData) {
         normalized = normalized.replace(/\*/g, "\n\n");
         normalized = normalized.replace(/[ \t]*\n\n[ \t]*/g, "\n\n");
         normalized = normalized.replace(/\n{3,}/g, "\n\n");
+
+        // paragraphs = normalized.split("\n\n").filter(function (paragraph) {
+        //     return !/^WHAT\.\.\./i.test((paragraph || "").trim());
+        // });
+
+        // normalized = paragraphs.join("\n\n");
 
         return normalized.trim();
     }

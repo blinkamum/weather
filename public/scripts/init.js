@@ -17,13 +17,30 @@ var getWeatherData = function (onSuccess) {
     var getActiveAlertsForPoint = function (point) {
 
         var deferred = $.Deferred();
+        var alertsUrl = "https://api.weather.gov/alerts/active?point=" + encodeURIComponent(point);
+        var shouldLogAlertFailures = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") || new URLSearchParams(window.location.search).get("debug") === "1";
 
-        $.get("https://api.weather.gov/alerts/active?point=" + encodeURIComponent(point))
+        $.get(alertsUrl)
             .done(function (alertsData) {
                 deferred.resolve(alertsData);
             })
-            .fail(function () {
-                deferred.resolve({ features: [] });
+            .fail(function (jqXHR, textStatus) {
+                if (shouldLogAlertFailures && window.console && window.console.error) {
+                    console.error("[alerts] request failed", {
+                        url: alertsUrl,
+                        textStatus: textStatus || "error",
+                        httpStatus: jqXHR && jqXHR.status ? jqXHR.status : undefined,
+                        statusText: jqXHR && jqXHR.statusText ? jqXHR.statusText : undefined,
+                        responseText: jqXHR && jqXHR.responseText ? jqXHR.responseText : undefined
+                    });
+                }
+
+                deferred.resolve({
+                    features: [],
+                    requestFailed: true,
+                    requestStatus: textStatus || "error",
+                    requestHttpStatus: jqXHR && jqXHR.status ? jqXHR.status : undefined
+                });
             });
 
         return deferred.promise();
