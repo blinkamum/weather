@@ -14,7 +14,7 @@ var addLoadEvent = function(func) {
 
 var getWeatherData = function (onSuccess) {
 
-    var getActiveAlertsForPoint = function (point) {
+    var getActiveAlertsForPoint = function (point, zipCode) {
 
         var deferred = $.Deferred();
         var alertsUrl = "https://api.weather.gov/alerts/active?point=" + encodeURIComponent(point);
@@ -22,7 +22,25 @@ var getWeatherData = function (onSuccess) {
 
         $.get(alertsUrl)
             .done(function (alertsData) {
-                deferred.resolve(alertsData);
+                var features = alertsData && alertsData.features ? alertsData.features : [];
+                var enrichedAlertsData = alertsData && typeof alertsData === "object" ? alertsData : { features: [] };
+
+                enrichedAlertsData.features = features;
+                enrichedAlertsData.requestFailed = false;
+                enrichedAlertsData.requestPoint = point;
+                enrichedAlertsData.requestZip = zipCode;
+                enrichedAlertsData.debugEnabled = shouldLogAlertFailures;
+
+                if (shouldLogAlertFailures && window.console && window.console.info) {
+                    console.info("[alerts] request succeeded", {
+                        url: alertsUrl,
+                        zipCode: zipCode,
+                        point: point,
+                        featureCount: features.length
+                    });
+                }
+
+                deferred.resolve(enrichedAlertsData);
             })
             .fail(function (jqXHR, textStatus) {
                 if (shouldLogAlertFailures && window.console && window.console.error) {
@@ -39,14 +57,18 @@ var getWeatherData = function (onSuccess) {
                     features: [],
                     requestFailed: true,
                     requestStatus: textStatus || "error",
-                    requestHttpStatus: jqXHR && jqXHR.status ? jqXHR.status : undefined
+                    requestHttpStatus: jqXHR && jqXHR.status ? jqXHR.status : undefined,
+                    requestPoint: point,
+                    requestZip: zipCode,
+                    debugEnabled: shouldLogAlertFailures
                 });
             });
 
         return deferred.promise();
     }
 
-    var point = getGeoPointsForZipCode(this.zipCode);
+    var zipCode = this.zipCode;
+    var point = getGeoPointsForZipCode(zipCode);
 
     $.get(
         "https://api.weather.gov/points/" + point,
@@ -54,7 +76,7 @@ var getWeatherData = function (onSuccess) {
             $.when(
                 $.get(geoPointsInfo.properties.forecastGridData),
                 $.get(geoPointsInfo.properties.forecastHourly),
-                getActiveAlertsForPoint(point)
+                getActiveAlertsForPoint(point, zipCode)
             ).done(function (gridResponse, hourlyResponse, alertsData) {
                 var gridData = gridResponse[0];
                 var hourlyData = hourlyResponse[0];

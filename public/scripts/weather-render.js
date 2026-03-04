@@ -316,6 +316,9 @@ var renderHazardMessages = function (alertsData) {
     var requestFailed;
     var requestStatus;
     var requestHttpStatus;
+    var requestPoint;
+    var requestZip;
+    var debugEnabled;
     var escapeHtml;
     var normalizeDescriptionText;
 
@@ -329,6 +332,9 @@ var renderHazardMessages = function (alertsData) {
     requestFailed = alertsData && alertsData.requestFailed === true;
     requestStatus = alertsData && alertsData.requestStatus ? alertsData.requestStatus : "error";
     requestHttpStatus = alertsData && alertsData.requestHttpStatus ? alertsData.requestHttpStatus : undefined;
+    requestPoint = alertsData && alertsData.requestPoint ? alertsData.requestPoint : "";
+    requestZip = alertsData && alertsData.requestZip ? alertsData.requestZip : "";
+    debugEnabled = alertsData && alertsData.debugEnabled === true;
 
     if (!features.length) {
         if (requestFailed) {
@@ -338,6 +344,19 @@ var renderHazardMessages = function (alertsData) {
                     "<div class='message-body'>Unable to load alerts right now (" +
                         escapeHtml(requestStatus + (requestHttpStatus ? ", HTTP " + requestHttpStatus : "")) +
                     ").</div>" +
+                "</article>"
+            );
+            return;
+        }
+
+        if (debugEnabled) {
+            hazardMessagesElement.html(
+                "<article class='message is-info is-light'>" +
+                    "<div class='message-header'><p>Active NWS alerts</p></div>" +
+                    "<div class='message-body'>No active alerts right now for " +
+                        escapeHtml(requestZip ? ("ZIP " + requestZip) : "this location") +
+                        (requestPoint ? (" (" + escapeHtml(requestPoint) + ")") : "") +
+                    ".</div>" +
                 "</article>"
             );
             return;
@@ -368,11 +387,11 @@ var renderHazardMessages = function (alertsData) {
         normalized = normalized.replace(/[ \t]*\n\n[ \t]*/g, "\n\n");
         normalized = normalized.replace(/\n{3,}/g, "\n\n");
 
-        // paragraphs = normalized.split("\n\n").filter(function (paragraph) {
-        //     return !/^WHAT\.\.\./i.test((paragraph || "").trim());
-        // });
+        paragraphs = normalized.split("\n\n").filter(function (paragraph) {
+            return !/^WHAT\.\.\./i.test((paragraph || "").trim());
+        });
 
-        // normalized = paragraphs.join("\n\n");
+        normalized = paragraphs.join("\n\n");
 
         return normalized.trim();
     }
